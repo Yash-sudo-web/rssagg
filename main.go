@@ -1,6 +1,7 @@
 package main
 
 import (
+	"database/sql"
 	"fmt"
 	"log"
 	"net/http"
@@ -9,7 +10,14 @@ import (
 	"github.com/go-chi/chi"
 	"github.com/go-chi/cors"
 	"github.com/joho/godotenv"
+	"github.com/yash-sudo-web/rssagg/internal/database"
+
+	_ "github.com/lib/pq"
 )
+
+type apiConfig struct {
+	DB *database.Queries
+}
 
 func main() {
 
@@ -20,6 +28,20 @@ func main() {
 		log.Fatal("PORT not found in .env file")
 	} else {
 		fmt.Println("Port: ", portstr)
+	}
+
+	dbstr := os.Getenv("DB_URL")
+	if dbstr == "" {
+		log.Fatal("DB_URL not found in .env file")
+	}
+
+	con, err1 := sql.Open("postgres", dbstr)
+	if err1 != nil {
+		log.Fatal("Cannot connect to the DB.", err1)
+	}
+
+	apicfg := apiConfig{
+		DB: database.New(con),
 	}
 
 	router := chi.NewRouter()
@@ -35,7 +57,8 @@ func main() {
 
 	v1Router := chi.NewRouter()
 	v1Router.Get("/health", health)
-	v1Router.Get("/err", err)
+	v1Router.Get("/err", handle_err)
+	v1Router.Post("/user", apicfg.handleCreateUser)
 
 	router.Mount("/v1", v1Router)
 
