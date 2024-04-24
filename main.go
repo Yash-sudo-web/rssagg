@@ -58,8 +58,10 @@ func main() {
 	v1Router := chi.NewRouter()
 	v1Router.Get("/health", health)
 	v1Router.Get("/err", handle_err)
-	v1Router.Post("/user", apicfg.handleCreateUser)
-
+	v1Router.Post("/createuser", apicfg.handleCreateUser)
+	v1Router.Get("/getuser", apicfg.middlewareAuth(apicfg.handleGetUser))
+	v1Router.Post("/createfeed", apicfg.middlewareAuth(apicfg.handleCreateFeed))
+	v1Router.Get("/getfeed", apicfg.handleGetFeed)
 	router.Mount("/v1", v1Router)
 
 	server := &http.Server{

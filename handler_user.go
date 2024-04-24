@@ -32,6 +32,9 @@ func (apiConfig *apiConfig) handleCreateUser(w http.ResponseWriter, r *http.Requ
 		errJSON(w, http.StatusInternalServerError, "Couldn't create user")
 		return
 	}
-
 	responseJSON(w, http.StatusOK, databaseUserToUser(user))
+}
+
+func (apiConfig *apiConfig) handleGetUser(w http.ResponseWriter, r *http.Request, user database.User) {
+	responseJSON(w, 200, databaseUserToUser(user))
 }
